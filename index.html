@@ -257,6 +257,7 @@ body {
 <button id="reset-game-btn" class="btn-action bg-yellow-500 text-white hover:bg-yellow-600 px-4 py-1.5 text-md">Reset Game</button>
 <button id="edit-all-players-btn" class="btn-action bg-blue-500 text-white hover:bg-blue-600 px-4 py-1.5 text-md">Edit Players</button>
 <button id="generate-report-btn" class="btn-action bg-green-500 text-white hover:bg-green-600 px-4 py-1.5 text-md">Generate Report</button>
+<button id="clear-data-info-btn" class="btn-action bg-gray-500 text-white hover:bg-gray-600 px-4 py-1.5 text-md">Clear App Data Info</button>
 </div>
 </div>
 
@@ -309,6 +310,42 @@ body {
 <button id="close-report-btn" class="px-4 py-1.5 rounded-md bg-gray-300 text-gray-800 hover:bg-gray-400 font-semibold text-sm">Close</button>
 </div>
 </div>
+</div>
+
+<!-- NEW: Clear Data Info Modal -->
+<div id="clear-data-info-modal" class="fixed inset-0 modal-overlay flex items-center justify-center p-4 z-50 hidden">
+    <div class="modal-content transform transition-all duration-300 scale-95 opacity-0 max-h-[90vh] overflow-y-auto">
+        <h3 class="text-xl font-bold mb-3 text-gray-800">How to Clear App Data</h3>
+        <p class="text-gray-700 mb-4 text-sm">
+            This application stores your game data (scores, player stats, names) directly in your browser's 
+            **Local Storage**. This means your data is saved on your device and will persist even if you 
+            close the browser or turn off your computer.
+        </p>
+        <p class="text-gray-700 mb-4 text-sm">
+            To clear this data, you typically need to clear your browser's site data or cache for this specific website.
+            Here are general steps for common browsers:
+        </p>
+        <ul class="list-disc list-inside text-gray-700 mb-4 text-sm space-y-2">
+            <li>
+                <strong>Chrome:</strong> Go to Settings > Privacy and security > Site Settings > View permissions and data stored across sites. Search for this website, click on it, and then click "Clear data".
+            </li>
+            <li>
+                <strong>Firefox:</strong> Go to Settings > Privacy & Security > Cookies and Site Data > Manage Data. Search for this website, select it, and click "Remove Selected".
+            </li>
+            <li>
+                <strong>Edge:</strong> Go to Settings > Cookies and site permissions > Manage and delete cookies and site data > See all cookies and site data. Search for this website and click the trash can icon next to it.
+            </li>
+            <li>
+                <strong>Safari (iOS/iPadOS):</strong> Go to iOS Settings > Safari > Advanced > Website Data. You can either remove all website data or edit and remove data for specific sites.
+            </li>
+        </ul>
+        <p class="text-gray-700 mb-5 text-sm">
+            Clearing this data will reset the app to its initial state.
+        </p>
+        <div class="flex justify-end">
+            <button id="close-clear-data-info-btn" class="px-4 py-1.5 rounded-md bg-gray-300 text-gray-800 hover:bg-gray-400 font-semibold text-sm">Close</button>
+        </div>
+    </div>
 </div>
 
 
@@ -507,10 +544,11 @@ const playerIndex = players.findIndex(p => p.id === activePlayerId);
 if (playerIndex !== -1) {
     // Check if the active stat is 'points'
     if (statType === 'points') {
-    players[playerIndex].stats[statType] += 2; // Increment player's points by 2
-    myTeamScore += 2; // Increment team score by 2
+        players[playerIndex].stats[statType] += 2; // Increment player's points by 2
+        players[playerIndex].stats['shots']++; // NEW: Increment shots when points are added
+        myTeamScore += 2; // Increment team score by 2
     } else {
-    players[playerIndex].stats[statType]++; // Increment other stats by 1
+        players[playerIndex].stats[statType]++; // Increment other stats by 1
     }
 
     // MODIFIED: After adding a stat, deselect the player and close the modal
@@ -745,6 +783,26 @@ showMessageBox('Game Reset', 'The game has been reset successfully!', 'alert');
 }
 );
 });
+
+// NEW: Event listeners for the Clear Data Info modal
+const clearDataInfoBtn = document.getElementById('clear-data-info-btn');
+const clearDataInfoModal = document.getElementById('clear-data-info-modal');
+const closeClearDataInfoBtn = document.getElementById('close-clear-data-info-btn');
+
+clearDataInfoBtn.addEventListener('click', () => {
+    clearDataInfoModal.classList.remove('hidden');
+    setTimeout(() => {
+        clearDataInfoModal.querySelector('.modal-content').classList.remove('scale-95', 'opacity-0');
+        clearDataInfoModal.querySelector('.modal-content').classList.add('scale-100', 'opacity-100');
+    }, 50);
+});
+
+closeClearDataInfoBtn.addEventListener('click', () => {
+    clearDataInfoModal.classList.add('hidden');
+    clearDataInfoModal.querySelector('.modal-content').classList.remove('scale-100', 'opacity-100');
+    clearDataInfoModal.querySelector('.modal-content').classList.add('scale-95', 'opacity-0');
+});
+
 
 // Register the Service Worker
 if ('serviceWorker' in navigator) {
